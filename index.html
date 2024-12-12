@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yazı Tura İddia Oyunu</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .green {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .red {
+            background-color: #f44336;
+            color: white;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Yazı Tura İddia Oyunu</h1>
+
+    <div id="setup">
+        <div>
+            <label for="balance">Başlangıç Bakiyesi: </label>
+            <input type="number" id="balance" placeholder="Örn: 1000" />
+        </div>
+        <div>
+            <label for="rate">Binde Oranı: </label>
+            <input type="number" id="rate" placeholder="Örn: 10" />
+        </div>
+        <button onclick="startGame()">Başla</button>
+    </div>
+
+    <div id="game" style="display: none;">
+        <h2>Oyun Bilgileri</h2>
+        <p>Başlangıç Bakiyesi: <span id="start-balance">0</span> TL</p>
+        <p>Binde Oranı: <span id="rate-display">0</span></p>
+        <p>Güncel Bakiye: <span id="current-balance">0</span> TL</p>
+        <p>Mevcut Bahis: <span id="current-bet">0</span> TL</p>
+        <p>Oynanan Turlar: <span id="round-count">0</span></p>
+        <p>Kazanılan Turlar: <span id="win-count">0</span></p>
+        <p>Toplam Kar: <span id="total-profit">0</span> TL</p>
+
+        <button class="green" onclick="win()">Kazandım</button>
+        <button class="red" onclick="lose()">Kaybettim</button>
+
+        <div id="result"></div>
+        <p>Geçen Süre: <span id="elapsed-time">0</span></p>
+        <button onclick="resetGame()">Sıfırla</button>
+        <button onclick="restartGame()">Baştan Başla</button>
+    </div>
+
+    <script>
+        let startBalance = 0;
+        let currentBalance = 0;
+        let rate = 0;
+        let currentBet = 0;
+        let roundCount = 0;
+        let winCount = 0;
+        let totalProfit = 0;
+        let startTime;
+
+        function startGame() {
+            startBalance = parseFloat(document.getElementById('balance').value);
+            rate = parseFloat(document.getElementById('rate').value);
+
+            if (isNaN(startBalance) || isNaN(rate) || startBalance <= 0 || rate <= 0) {
+                alert('Lütfen geçerli bir başlangıç bakiyesi ve binde oranı giriniz.');
+                return;
+            }
+
+            currentBalance = startBalance;
+            currentBet = (startBalance * rate) / 1000;
+            roundCount = 0;
+            winCount = 0;
+            totalProfit = 0;
+            startTime = Date.now();
+
+            document.getElementById('start-balance').textContent = startBalance;
+            document.getElementById('rate-display').textContent = rate;
+            document.getElementById('current-balance').textContent = currentBalance;
+            document.getElementById('current-bet').textContent = currentBet;
+            document.getElementById('round-count').textContent = roundCount;
+            document.getElementById('win-count').textContent = winCount;
+            document.getElementById('total-profit').textContent = totalProfit;
+
+            document.getElementById('result').textContent = '';
+            document.getElementById('elapsed-time').textContent = '0';
+            document.getElementById('setup').style.display = 'none';
+            document.getElementById('game').style.display = 'block';
+
+            setInterval(updateElapsedTime, 1000);
+        }
+
+        function win() {
+            currentBalance += currentBet;
+            totalProfit += (startBalance * rate) / 1000;
+            winCount++;
+            roundCount++;
+            updateResult('Kazandınız!');
+            resetBet();
+            updateDisplay();
+        }
+
+        function lose() {
+            currentBalance -= currentBet;
+            roundCount++;
+            updateResult('Kaybettiniz!');
+            currentBet *= 2;
+            updateDisplay();
+        }
+
+        function resetBet() {
+            currentBet = (startBalance * rate) / 1000;
+        }
+
+        function updateDisplay() {
+            document.getElementById('current-balance').textContent = currentBalance;
+            document.getElementById('current-bet').textContent = currentBet;
+            document.getElementById('round-count').textContent = roundCount;
+            document.getElementById('win-count').textContent = winCount;
+            document.getElementById('total-profit').textContent = totalProfit;
+
+            if (currentBalance <= 0) {
+                alert('Oyun bitti! Bakiyeniz tükendi.');
+                document.getElementById('game').style.display = 'none';
+                document.getElementById('setup').style.display = 'block';
+            }
+        }
+
+        function updateResult(message) {
+            document.getElementById('result').textContent = message;
+        }
+
+        function updateElapsedTime() {
+            const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+            const hours = Math.floor(elapsedTime / 3600);
+            const minutes = Math.floor((elapsedTime % 3600) / 60);
+            const seconds = elapsedTime % 60;
+            document.getElementById('elapsed-time').textContent = `${hours} saat ${minutes} dakika ${seconds} saniye`;
+        }
+
+        function resetGame() {
+            currentBalance = startBalance;
+            currentBet = (startBalance * rate) / 1000;
+            roundCount = 0;
+            winCount = 0;
+            totalProfit = 0;
+            startTime = Date.now();
+
+            updateDisplay();
+            document.getElementById('result').textContent = '';
+        }
+
+        function restartGame() {
+            document.getElementById('setup').style.display = 'block';
+            document.getElementById('game').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
